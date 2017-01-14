@@ -1,7 +1,7 @@
 {
-  "name": "get-git-paths",
+  "name": "query-paths",
   "version": "1.0.0",
-  "description": "Small library to get all git paths in a given root path",
+  "description": "Small library to get all paths that contains one or multiple file names.",
   "main": "src/index.js",
   "scripts": {
     "eslint": "eslint src/**/*.js",
@@ -13,10 +13,10 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/canastro/get-git-paths"
+    "url": "https://github.com/canastro/query-paths"
   },
   "bugs": {
-    "url": "https://github.com/canastro/get-git-paths/issues"
+    "url": "https://github.com/canastro/query-paths/issues"
   },
   "keywords": [
     "git",

@@ -5,17 +5,33 @@ const promise = require('bluebird');
 const fs = promise.promisifyAll(require('fs'));
 
 /**
+ * Validates if the current list of files matches the query
+ * @method  isMatch
+ * @param   {Array}         files
+ * @param   {String|Array}  query
+ * @returns {Boolean}
+ */
+const isMatch = (files, query) => {
+    if (Array.isArray(query)) {
+        return query.some(item => files.indexOf(item) !== -1);
+    }
+
+    return files.indexOf(query) !== -1;
+};
+
+/**
  * Recursive function that will travel down the root directory
- * gathering the ones that have a .git file
+ * gathering the ones that have a `${query}` file
  * @method  getProjectsPaths
  * @param   {String} currentPath
+ * @param   {String} query
  * @returns {Promise}
  */
-const getProjectsPaths = (currentPath) =>
+const getProjectsPaths = (currentPath, query) =>
     fs.readdirAsync(currentPath).then((files) => {
         const promises = [];
 
-        if (files.indexOf('.git') !== -1) {
+        if (isMatch(files, query)) {
             return Promise.resolve(currentPath);
         }
 
@@ -24,7 +40,7 @@ const getProjectsPaths = (currentPath) =>
             const promise = fs.statAsync(currentFilePath)
                 .then((stats) => {
                     if (stats.isDirectory()) {
-                        return getProjectsPaths(currentFilePath);
+                        return getProjectsPaths(currentFilePath, query);
                     }
                 });
 
@@ -34,12 +50,12 @@ const getProjectsPaths = (currentPath) =>
         return Promise.all(promises);
     });
 
-module.exports = function getGitPaths(rootPath) {
-    if (!rootPath) {
-        throw new Error('GET-GIT-PATHS: no rootPath provided');
+module.exports = function getGitPaths(rootPath, query) {
+    if (!rootPath || !query) {
+        throw new Error('GET-GIT-PATHS: invalid parameters');
     }
 
-    return getProjectsPaths(rootPath)
+    return getProjectsPaths(rootPath, query)
         .then((files) => {
             if (!Array.isArray(files)) {
                 files = [files];

@@ -20,11 +20,15 @@ describe('index', function() {
         it('should throw error', () => {
             const getGitPaths = requireUncached('../src/index');
 
-            function fn() {
-                getGitPaths();
-            };
+            expect(() => getGitPaths()).to.throw(/GET-GIT-PATHS: invalid parameters/);
+        });
+    });
 
-            expect(fn).to.throw(/GET-GIT-PATHS: no rootPath provided/);
+    context('when no query is provided', () => {
+        it('should throw error', () => {
+            const getGitPaths = requireUncached('../src/index');
+
+            expect(() => getGitPaths('test.json')).to.throw(/GET-GIT-PATHS: invalid parameters/);
         });
     });
 
@@ -46,7 +50,7 @@ describe('index', function() {
 
                 const getGitPaths = requireUncached('../src/index');
 
-                getGitPaths('/').then((files) => {
+                getGitPaths('/', '.git').then((files) => {
                     expect(files).to.deep.equal(['/']);
                     done();
                 });
@@ -80,8 +84,42 @@ describe('index', function() {
 
                 const getGitPaths = requireUncached('../src/index');
 
-                getGitPaths('/').then((files) => {
+                getGitPaths('/', '.git').then((files) => {
                     expect(files).to.deep.equal(['/folderB']);
+                    done();
+                });
+            });
+        });
+
+        context('when the query has two files', () => {
+            it('should return git and package.json paths', function (done) {
+                const filesA = ['folderB', 'folderC', 'other.json'];
+                const filesB = ['.git', 'otherB.json'];
+                const filesC = ['package.json'];
+
+                const readdirAsync = sandbox.stub();
+                readdirAsync.onCall(0).returns(Promise.resolve(filesA));
+                readdirAsync.onCall(1).returns(Promise.resolve(filesB));
+                readdirAsync.onCall(2).returns(Promise.resolve(filesC));
+
+                const statAsync = sandbox.stub();
+                statAsync.onCall(0).returns(Promise.resolve({ isDirectory: () => true }));
+                statAsync.onCall(1).returns(Promise.resolve({ isDirectory: () => true }));
+                statAsync.returns(Promise.resolve({ isDirectory: () => false }));
+
+                const fs = {
+                    readdirAsync,
+                    statAsync
+                };
+
+                mock('bluebird', {
+                    promisifyAll: () => fs
+                });
+
+                const getGitPaths = requireUncached('../src/index');
+
+                getGitPaths('/', ['.git', 'package.json']).then((files) => {
+                    expect(files).to.deep.equal(['/folderB', '/folderC']);
                     done();
                 });
             });
