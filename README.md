@@ -5,6 +5,9 @@
 # get-git-paths
 Small library to get all git paths in a given root path.
 
+## How it works
+This module is a composed by a recursive function that will travel down the root directory gathering the ones that have a .git file.
+
 ## Usage
 ```js
 var getGitPaths = require('../src/index');
