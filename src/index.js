@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const events = require('events');
 const promise = require('bluebird');
 const fs = promise.promisifyAll(require('fs'));
 
@@ -27,21 +28,23 @@ const isMatch = (files, query) => {
  * @param   {String} query
  * @returns {Promise}
  */
-const getProjectsPaths = (currentPath, query) =>
+const getProjectsPaths = (currentPath, query, cb) =>
     fs.readdirAsync(currentPath).then((files) => {
         const promises = [];
 
         if (isMatch(files, query)) {
-            return Promise.resolve(currentPath);
+            return cb(currentPath);
         }
 
         files.forEach((file) => {
             const currentFilePath = path.join(currentPath, file);
-            const promise = fs.statAsync(currentFilePath)
+            const promise = fs.lstatAsync(currentFilePath)
                 .then((stats) => {
-                    if (stats.isDirectory()) {
-                        return getProjectsPaths(currentFilePath, query);
+                    if (stats.isSymbolicLink() || !stats.isDirectory()) {
+                        return null;
                     }
+
+                    return getProjectsPaths(currentFilePath, query, cb);
                 });
 
             promises.push(promise);
@@ -55,24 +58,13 @@ module.exports = function queryPaths(rootPath, query) {
         throw new Error('QUERY-PATHS: invalid parameters');
     }
 
-    return getProjectsPaths(rootPath, query)
-        .then((files) => {
-            if (!Array.isArray(files)) {
-                files = [files];
-            }
+    var eventEmitter = new events.EventEmitter();
 
-            return files;
-        })
-        .then((files) => {
-            return files.filter((file) => {
-                // If a nested folder is a leaf folder it will return a array
-                // with undefined in it, because we're returning a Promises.all
-                // with a return undefined inside
-                if (Array.isArray(file)) {
-                    return false;
-                }
+    getProjectsPaths(rootPath, query, (path) => {
+        eventEmitter.emit('data', path);
+    }).then(() => {
+        eventEmitter.emit('end');
+    });
 
-                return !!file;
-            });
-        });
+    return eventEmitter;
 };

@@ -41,7 +41,7 @@ describe('index', function() {
                 };
                 const fs = {
                     readdirAsync: sandbox.stub().returns(Promise.resolve(files)),
-                    statAsync: sandbox.stub().returns(Promise.resolve(stats))
+                    lstatAsync: sandbox.stub().returns(Promise.resolve(stats))
                 };
 
                 mock('bluebird', {
@@ -50,8 +50,12 @@ describe('index', function() {
 
                 const queryPaths = requireUncached('../src/index');
 
-                queryPaths('/', '.git').then((files) => {
-                    expect(files).to.deep.equal(['/']);
+                const event = queryPaths('/', '.git');
+                event.on('data', (files) => {
+                    expect(files).to.deep.equal('/');
+                });
+
+                event.on('end', () => {
                     done();
                 });
             });
@@ -63,19 +67,29 @@ describe('index', function() {
                 const filesB = ['.git', 'otherB.json'];
                 const filesC = ['otherB.json'];
 
-                const readdirAsync = sandbox.stub();
-                readdirAsync.onCall(0).returns(Promise.resolve(filesA));
-                readdirAsync.onCall(1).returns(Promise.resolve(filesB));
-                readdirAsync.onCall(2).returns(Promise.resolve(filesC));
+                const readdirAsync = (currentPath) => {
+                    switch (currentPath) {
+                    case '/folderB':
+                        return Promise.resolve(filesB);
+                    case '/folderC':
+                        return Promise.resolve(filesC);
+                    default:
+                        return Promise.resolve(filesA);
+                    }
+                };
 
-                const statAsync = sandbox.stub();
-                statAsync.onCall(0).returns(Promise.resolve({ isDirectory: () => true }));
-                statAsync.onCall(1).returns(Promise.resolve({ isDirectory: () => true }));
-                statAsync.returns(Promise.resolve({ isDirectory: () => false }));
+                const lstatAsync = (path) => {
+                    const isDirectory = ['/folderB', '/folderC'].indexOf(path) !== -1;
+
+                    return Promise.resolve({
+                        isDirectory: () => isDirectory,
+                        isSymbolicLink: () => false
+                    });
+                };
 
                 const fs = {
                     readdirAsync,
-                    statAsync
+                    lstatAsync
                 };
 
                 mock('bluebird', {
@@ -84,32 +98,46 @@ describe('index', function() {
 
                 const queryPaths = requireUncached('../src/index');
 
-                queryPaths('/', '.git').then((files) => {
-                    expect(files).to.deep.equal(['/folderB']);
+                const event = queryPaths('/', '.git');
+                event.on('data', (files) => {
+                    expect(files).to.deep.equal('/folderB');
+                });
+
+                event.on('end', () => {
                     done();
                 });
             });
         });
 
         context('when the query has two files', () => {
-            it('should return git and package.json paths', function (done) {
+            it('should return git paths', function (done) {
                 const filesA = ['folderB', 'folderC', 'other.json'];
                 const filesB = ['.git', 'otherB.json'];
                 const filesC = ['package.json'];
 
-                const readdirAsync = sandbox.stub();
-                readdirAsync.onCall(0).returns(Promise.resolve(filesA));
-                readdirAsync.onCall(1).returns(Promise.resolve(filesB));
-                readdirAsync.onCall(2).returns(Promise.resolve(filesC));
+                const readdirAsync = (currentPath) => {
+                    switch (currentPath) {
+                    case '/folderB':
+                        return Promise.resolve(filesB);
+                    case '/folderC':
+                        return Promise.resolve(filesC);
+                    default:
+                        return Promise.resolve(filesA);
+                    }
+                };
 
-                const statAsync = sandbox.stub();
-                statAsync.onCall(0).returns(Promise.resolve({ isDirectory: () => true }));
-                statAsync.onCall(1).returns(Promise.resolve({ isDirectory: () => true }));
-                statAsync.returns(Promise.resolve({ isDirectory: () => false }));
+                const lstatAsync = (path) => {
+                    const isDirectory = ['/folderB', '/folderC'].indexOf(path) !== -1;
+
+                    return Promise.resolve({
+                        isDirectory: () => isDirectory,
+                        isSymbolicLink: () => false
+                    });
+                };
 
                 const fs = {
                     readdirAsync,
-                    statAsync
+                    lstatAsync
                 };
 
                 mock('bluebird', {
@@ -118,8 +146,19 @@ describe('index', function() {
 
                 const queryPaths = requireUncached('../src/index');
 
-                queryPaths('/', ['.git', 'package.json']).then((files) => {
-                    expect(files).to.deep.equal(['/folderB', '/folderC']);
+                let calls = 0;
+                const event = queryPaths('/', ['.git', 'package.json']);
+                event.on('data', (files) => {
+                    calls++;
+
+                    if (calls === 1) {
+                        expect(files).to.deep.equal('/folderB');
+                    } else {
+                        expect(files).to.deep.equal('/folderC');
+                    }
+                });
+
+                event.on('end', () => {
                     done();
                 });
             });

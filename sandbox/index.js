@@ -1,13 +1,25 @@
 var queryPaths = require('../src/index');
 
-queryPaths('/Users/ricardocanastro/dev/canastror/gin', '.git').then(function (response) {
-    console.log('git:: ', response);
+const first = queryPaths('/Users/ricardocanastro/dev/canastror', 'notfound');
+first.on('data', (path) => {
+    console.log('first: ', path);
+});
+first.on('end', () => {
+    console.log('first ended');
 });
 
-queryPaths('/Users/ricardocanastro/dev/canastror/gin', 'package.json').then(function (response) {
-    console.log('package.json:: ', response);
+const second = queryPaths('/Users/ricardocanastro/dev/canastror', 'package.json');
+second.on('data', (path) => {
+    console.log('second: ', path);
+});
+second.on('end', () => {
+    console.log('second ended');
 });
 
-queryPaths('/Users/ricardocanastro/dev/canastror/gin', ['package.json', '.git']).then(function (response) {
-    console.log('package.json or .git:: ', response);
+const third = queryPaths('/Users/ricardocanastro/dev/canastror', ['.git', 'package.json']);
+third.on('data', (path) => {
+    console.log('third: ', path);
+});
+third.on('end', () => {
+    console.log('third ended');
 });

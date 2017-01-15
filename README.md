@@ -12,18 +12,27 @@ This module is a composed by a recursive function that will travel down the root
 ```js
 var queryPaths = require('../src/index');
 
-queryPaths('/Users/username/dev', '.git')
-    .then(function (response) {
-        console.log('All folders with a .git file: ', response);
-    });
+const first = queryPaths('/Users/username/dev', 'notfound');
+first.on('data', (path) => {
+    console.log('first: ', path);
+});
+first.on('end', () => {
+    console.log('first ended');
+});
 
-queryPaths('/Users/username/dev', 'package.json')
-    .then(function (response) {
-        console.log('All folders with a package.json file: ', response);
-    });
+const second = queryPaths('/Users/username/dev', 'package.json');
+second.on('data', (path) => {
+    console.log('second: ', path);
+});
+second.on('end', () => {
+    console.log('second ended');
+});
 
-queryPaths('/Users/username/dev', ['.git', 'package.json'])
-    .then(function (response) {
-        console.log('All folders with a .git or package.json file: ', response);
-    });
+const third = queryPaths('/Users/username/dev', ['.git', 'package.json']);
+third.on('data', (path) => {
+    console.log('third: ', path);
+});
+third.on('end', () => {
+    console.log('third ended');
+});
 ```
