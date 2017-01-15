@@ -7,7 +7,7 @@
     "eslint": "eslint src/**/*.js",
     "test": "npm run eslint && istanbul cover ./node_modules/.bin/_mocha tests",
     "test:dev": "mocha tests --recursive --watch",
-    "codecov": "cat coverage/*/lcov.info | ./node_modules/codecov.io/bin/codecov.io.js"
+    "codecov": "cat coverage/lcov.info | ./node_modules/codecov.io/bin/codecov.io.js"
   },
   "author": "Ricardo Canastro",
   "license": "ISC",
