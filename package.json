@@ -1,6 +1,6 @@
 {
   "name": "query-paths",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Small library to get all paths that contains one or multiple file names.",
   "main": "src/index.js",
   "scripts": {

@@ -146,7 +146,7 @@ describe('index', function() {
 
                 const queryPaths = requireUncached('../src/index');
 
-                let calls = 0;
+                var calls = 0;
                 const event = queryPaths('/', ['.git', 'package.json']);
                 event.on('data', (files) => {
                     calls++;
