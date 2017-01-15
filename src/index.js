@@ -50,9 +50,9 @@ const getProjectsPaths = (currentPath, query) =>
         return Promise.all(promises);
     });
 
-module.exports = function getGitPaths(rootPath, query) {
+module.exports = function queryPaths(rootPath, query) {
     if (!rootPath || !query) {
-        throw new Error('GET-GIT-PATHS: invalid parameters');
+        throw new Error('QUERY-PATHS: invalid parameters');
     }
 
     return getProjectsPaths(rootPath, query)

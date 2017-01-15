@@ -1,6 +1,6 @@
-![build status](https://travis-ci.org/canastro/get-git-paths.svg?branch=master)
-[![npm version](https://badge.fury.io/js/get-git-paths.svg)](https://badge.fury.io/js/get-git-paths)
-[![codecov](https://codecov.io/gh/canastro/get-git-paths/branch/master/graph/badge.svg)](https://codecov.io/gh/canastro/get-git-paths)
+![build status](https://travis-ci.org/canastro/query-paths.svg?branch=master)
+[![npm version](https://badge.fury.io/js/query-paths.svg)](https://badge.fury.io/js/query-paths)
+[![codecov](https://codecov.io/gh/canastro/query-paths/branch/master/graph/badge.svg)](https://codecov.io/gh/canastro/query-paths)
 
 # query-paths
 Small library to get all paths that contains one or multiple file names.

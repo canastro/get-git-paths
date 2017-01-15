@@ -18,17 +18,17 @@ describe('index', function() {
 
     context('when no path is provided', () => {
         it('should throw error', () => {
-            const getGitPaths = requireUncached('../src/index');
+            const queryPaths = requireUncached('../src/index');
 
-            expect(() => getGitPaths()).to.throw(/GET-GIT-PATHS: invalid parameters/);
+            expect(() => queryPaths()).to.throw(/QUERY-PATHS: invalid parameters/);
         });
     });
 
     context('when no query is provided', () => {
         it('should throw error', () => {
-            const getGitPaths = requireUncached('../src/index');
+            const queryPaths = requireUncached('../src/index');
 
-            expect(() => getGitPaths('test.json')).to.throw(/GET-GIT-PATHS: invalid parameters/);
+            expect(() => queryPaths('test.json')).to.throw(/QUERY-PATHS: invalid parameters/);
         });
     });
 
@@ -48,9 +48,9 @@ describe('index', function() {
                     promisifyAll: () => fs
                 });
 
-                const getGitPaths = requireUncached('../src/index');
+                const queryPaths = requireUncached('../src/index');
 
-                getGitPaths('/', '.git').then((files) => {
+                queryPaths('/', '.git').then((files) => {
                     expect(files).to.deep.equal(['/']);
                     done();
                 });
@@ -82,9 +82,9 @@ describe('index', function() {
                     promisifyAll: () => fs
                 });
 
-                const getGitPaths = requireUncached('../src/index');
+                const queryPaths = requireUncached('../src/index');
 
-                getGitPaths('/', '.git').then((files) => {
+                queryPaths('/', '.git').then((files) => {
                     expect(files).to.deep.equal(['/folderB']);
                     done();
                 });
@@ -116,9 +116,9 @@ describe('index', function() {
                     promisifyAll: () => fs
                 });
 
-                const getGitPaths = requireUncached('../src/index');
+                const queryPaths = requireUncached('../src/index');
 
-                getGitPaths('/', ['.git', 'package.json']).then((files) => {
+                queryPaths('/', ['.git', 'package.json']).then((files) => {
                     expect(files).to.deep.equal(['/folderB', '/folderC']);
                     done();
                 });
